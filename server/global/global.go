@@ -1,7 +1,9 @@
 package global
 
 import (
+	"fmt"
 	"sync"
+	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/utils/timer"
 	"github.com/songzhibin97/gkit/cache/local_cache"
@@ -18,8 +20,11 @@ import (
 )
 
 var (
-	GVA_DB     *gorm.DB
+	GVA_DB *gorm.DB
+
+	lock       sync.RWMutex
 	GVA_DBList map[string]*gorm.DB
+
 	GVA_REDIS  *redis.Client
 	GVA_CONFIG config.Server
 	GVA_VP     *viper.Viper
@@ -29,7 +34,8 @@ var (
 	GVA_Concurrency_Control             = &singleflight.Group{}
 
 	BlackCache local_cache.Cache
-	lock       sync.RWMutex
+
+	ApiSecretCache = local_cache.NewCache(local_cache.SetDefaultExpire(10 * time.Minute))
 )
 
 // GetGlobalDBByDBName 通过名称获取db list中的db
@@ -48,4 +54,14 @@ func MustGetGlobalDBByDBName(dbname string) *gorm.DB {
 		panic("db no init")
 	}
 	return db
+}
+
+func FindPayment(id string) (config.Payment, bool) {
+	fmt.Println("findPayment", id, &GVA_CONFIG.Payments)
+	for _, item := range GVA_CONFIG.Payments {
+		if item.ID == id {
+			return item, true
+		}
+	}
+	return config.Payment{}, false
 }

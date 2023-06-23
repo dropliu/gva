@@ -94,7 +94,7 @@
             </transition>
           </div>
         </router-view>
-        <BottomInfo />
+      
         <setting />
       </el-main>
     </el-container>

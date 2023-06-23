@@ -1,11 +1,13 @@
 package system
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/model"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
@@ -29,6 +31,9 @@ func (userService *UserService) Register(u system.SysUser) (userInter system.Sys
 	// 否则 附加uuid 密码hash加密 注册
 	u.Password = utils.BcryptHash(u.Password)
 	u.UUID = uuid.NewV4()
+	// 生成api_secret
+	asID := uuid.NewV4()
+	u.ApiSecret = hex.EncodeToString(asID[:])
 	err = global.GVA_DB.Create(&u).Error
 	return u, err
 }
@@ -73,7 +78,35 @@ func (userService *UserService) ChangePassword(u *system.SysUser, newPassword st
 	user.Password = utils.BcryptHash(newPassword)
 	err = global.GVA_DB.Save(&user).Error
 	return &user, err
+}
 
+func (userService *UserService) ChangePayment(uuid, newPayment string) error {
+	return global.GVA_DB.Table(fmt.Sprintf("%s u, %s p", model.TableSysUser, model.TablePayment)).
+		Where("u.uuid=? AND p.identifier=?", uuid, newPayment).Update("u.payment", newPayment).Error
+}
+
+func (UserService *UserService) GetApiSecretByUUID(uuid string) (string, error) {
+	var usr system.SysUser
+	err := global.GVA_DB.Model(&usr).Select("api_secret").
+		Where("uuid=?", uuid).First(&usr).Error
+	return usr.ApiSecret, err
+}
+
+func (userService *UserService) RefreshApiSecret(id uint) (string, error) {
+	asID := uuid.NewV4()
+	apiSecret := hex.EncodeToString(asID[:])
+	var user system.SysUser
+	result := global.GVA_DB.Model(&user).Where("id=?", id).
+		Update("api_secret", apiSecret)
+	if result.Error != nil {
+		return "", result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return apiSecret, errors.New("user not exists")
+	}
+
+	return apiSecret, nil
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)

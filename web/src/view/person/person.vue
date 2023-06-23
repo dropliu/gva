@@ -122,6 +122,17 @@
                     >修改密码</a>
                   </p>
                 </li>
+                <li>
+                  <p class="title">接口密钥</p>
+                  <p class="desc"> 
+                    ApiKey: '{{userStore.userInfo.uuid}}' <br/>
+                    ApiSecret: '{{userStore.userInfo.apiSecret}}'
+                    <a
+                      href="javascript:void(0)"
+                      @click="resetApiSecret"
+                    >重置ApiSecret</a>
+                  </p>
+                </li>
               </ul>
             </el-tab-pane>
           </el-tabs>
@@ -232,10 +243,11 @@ export default {
 
 <script setup>
 import ChooseImg from '@/components/chooseImg/index.vue'
-import { setSelfInfo, changePassword } from '@/api/user.js'
+import { setSelfInfo, changePassword, refreshApiSecret } from '@/api/user.js'
 import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/pinia/modules/user'
+import { ElLoading } from 'element-plus'
 
 const path = ref(import.meta.env.VITE_BASE_API + '/')
 const activeName = ref('second')
@@ -295,6 +307,20 @@ const clearPassword = () => {
     confirmPassword: '',
   }
   modifyPwdForm.value.clearValidate()
+}
+
+const resetApiSecret = () => {
+  const ins = ElLoading.service()
+  refreshApiSecret().then(res=>{
+    if (res.code === 0) {
+      ElMessage.success('重置api_secret成功，请刷新页面')
+    } 
+
+    userStore.ResetUserInfo({apiSecret: res.data})
+    ins.close()
+  }).catch(err=>{
+    ins.close()
+  })
 }
 
 const chooseImgRef = ref(null)

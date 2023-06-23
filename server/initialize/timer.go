@@ -4,9 +4,11 @@ import (
 	"fmt"
 
 	"github.com/robfig/cron/v3"
+	"go.uber.org/zap"
 
 	"github.com/flipped-aurora/gin-vue-admin/server/config"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	"github.com/flipped-aurora/gin-vue-admin/server/service"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 )
 
@@ -30,4 +32,20 @@ func Timer() {
 			}(global.GVA_CONFIG.Timer.Detail[i])
 		}
 	}
+
+}
+
+var sysConfigService = service.ServiceGroupApp.ConfigServiceGroup.SysConfigService
+
+func UpdateFloatExchangeRateTimer() {
+	// fmt.Println("UpdateFloatExchangeRate 000")
+	c := cron.New()
+	c.AddFunc("*/1 * * * *", func() {
+		// fmt.Println("UpdateFloatExchangeRate 111")
+		err := sysConfigService.UpdateFloatExchangeRate()
+		if err != nil {
+			global.GVA_LOG.Error("更新浮动汇率失败:%v", zap.Error(err))
+		}
+	})
+	c.Start()
 }

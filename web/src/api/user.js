@@ -47,6 +47,21 @@ export const changePassword = (data) => {
   })
 }
 
+export const refreshApiSecret = () => {
+  return service({
+    url: '/user/refreshApiSecret',
+    method: 'PUT',
+  })
+}
+
+export const changePayment = (data) => {
+  return service({
+    url: '/user/changePayment',
+    method: 'PUT',
+    data: data
+  })
+}
+
 // @Tags User
 // @Summary 分页获取用户列表
 // @Security ApiKeyAuth

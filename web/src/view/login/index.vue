@@ -53,12 +53,12 @@
             </div>
           </el-form-item>
           <el-form-item>
-            <el-button
+            <!-- <el-button
               type="primary"
               style="width: 46%"
               size="large"
               @click="checkInit"
-            >前往初始化</el-button>
+            >前往初始化</el-button> -->
             <el-button
               type="primary"
               size="large"
@@ -70,7 +70,7 @@
       </div>
       <div class="login_panel_right" />
       <div class="login_panel_foot">
-        <div class="links">
+        <!-- <div class="links">
           <a href="http://doc.henrongyi.top/" target="_blank">
             <img src="@/assets/docs.png" class="link-icon" alt="文档">
           </a>
@@ -86,9 +86,9 @@
           <a href="https://space.bilibili.com/322210472" target="_blank">
             <img src="@/assets/video.png" class="link-icon" alt="视频站">
           </a>
-        </div>
+        </div> -->
         <div class="copyright">
-          <BottomInfo />
+          <!-- <BottomInfo /> -->
         </div>
       </div>
     </div>

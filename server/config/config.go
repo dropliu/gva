@@ -28,4 +28,7 @@ type Server struct {
 
 	// 跨域配置
 	Cors CORS `mapstructure:"cors" json:"cors" yaml:"cors"`
+
+	// Payments 支付方式
+	Payments []Payment `mapstructure:"payments" json:"payments" yaml:"payments"`
 }

@@ -22,7 +22,7 @@ func InstallPlugin(Router *gin.Engine) {
 	fmt.Println("无鉴权插件安装==》", PublicGroup)
 	PrivateGroup := Router.Group("")
 	fmt.Println("鉴权插件安装==》", PrivateGroup)
-	PrivateGroup.Use(middleware.JWTAuth()).Use(middleware.CasbinHandler())
+	PrivateGroup.Use(middleware.JWTAuth).Use(middleware.CasbinHandler())
 	//  添加跟角色挂钩权限的插件 示例 本地示例模式于在线仓库模式注意上方的import 可以自行切换 效果相同
 	PluginInit(PrivateGroup, email.CreateEmailPlug(
 		global.GVA_CONFIG.Email.To,

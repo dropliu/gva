@@ -157,8 +157,10 @@ func (b *BaseApi) Register(c *gin.Context) {
 			AuthorityId: v,
 		})
 	}
-	user := &system.SysUser{Username: r.Username, NickName: r.NickName, Password: r.Password, HeaderImg: r.HeaderImg, AuthorityId: r.AuthorityId, Authorities: authorities, Enable: r.Enable, Phone: r.Phone, Email: r.Email}
-	userReturn, err := userService.Register(*user)
+	user := system.SysUser{Username: r.Username, NickName: r.NickName,
+		Password: r.Password, HeaderImg: r.HeaderImg, AuthorityId: r.AuthorityId,
+		Authorities: authorities, Enable: r.Enable, Phone: r.Phone, Email: r.Email}
+	userReturn, err := userService.Register(user)
 	if err != nil {
 		global.GVA_LOG.Error("注册失败!", zap.Error(err))
 		response.FailWithDetailed(systemRes.SysUserResponse{User: userReturn}, "注册失败", c)
@@ -196,6 +198,44 @@ func (b *BaseApi) ChangePassword(c *gin.Context) {
 		return
 	}
 	response.OkWithMessage("修改成功", c)
+}
+
+func (b *BaseApi) ChangePayment(c *gin.Context) {
+	var req struct {
+		UUID    string `json:"uuid"`
+		Payemnt string `json:"payment"`
+	}
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	if len(req.UUID) == 0 || len(req.Payemnt) == 0 {
+		response.FailWithMessage("illegal params", c)
+		return
+	}
+
+	err = userService.ChangePayment(req.UUID, req.Payemnt)
+	if err != nil {
+		global.GVA_LOG.Error("修改失败!", zap.Error(err))
+		response.FailWithMessage("修改失败，请稍后重试", c)
+		return
+	}
+	response.OkWithMessage("修改成功", c)
+}
+
+func (b *BaseApi) RefreshApiSecret(c *gin.Context) {
+	// FIMXE: 缓存记录更新时间，不要频繁更新
+	uid := utils.GetUserID(c)
+	secret, err := userService.RefreshApiSecret(uid)
+	if err != nil {
+		global.GVA_LOG.Error("refresh_api_secret", zap.Error(err))
+		response.FailWithMessage("更新失败，请稍后重试", c)
+		return
+	}
+
+	response.OkWithData(secret, c)
 }
 
 // GetUserList

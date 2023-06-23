@@ -77,7 +77,7 @@
     </div>
     <el-dialog
       v-model="addUserDialog"
-      custom-class="user-dialog"
+      class="user-dialog"
       title="用户"
       :show-close="false"
       :close-on-press-escape="false"
