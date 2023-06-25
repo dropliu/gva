@@ -57,7 +57,7 @@ db-list:
   alias-name: ""
   path: ""
   port: ""
-  config: ""
+  config: charset=utf8mb4&parseTime=true&loc=Local
   db-name: ""
   username: ""
   password: ""
@@ -109,7 +109,7 @@ mssql:
 mysql:
   path: localhost
   port: "3306"
-  config: charset=utf8mb4&parseTime=True&loc=Local
+  config: charset=utf8mb4&parseTime=true&loc=Local
   db-name: testdb1
   username: root
   password: 123456

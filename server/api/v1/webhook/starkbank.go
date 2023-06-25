@@ -1,8 +1,11 @@
 package webhook
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
+	"io/ioutil"
 	"strings"
 	"time"
 	"unsafe"
@@ -70,12 +73,16 @@ type StarkBankWebhookRequest struct {
 
 // StarkBankWebhook starkbank 回调
 func StarkBankWebhook(c *gin.Context) {
+	body, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		return
+	}
+	c.Request.Body = io.NopCloser(bytes.NewReader(body))
+	global.GVA_LOG.Info("StarkBankWebhook:enter", zap.ByteString("req", body))
+
+	// 参数校验
 	var req StarkBankWebhookRequest
 	c.ShouldBindJSON(&req)
-	// 参数校验
-	val, _ := c.Get(gin.BodyBytesKey)
-	body, _ := val.([]byte)
-	global.GVA_LOG.Info("StarkBankWebhook:enter", zap.ByteString("req", body))
 
 	// 解析log
 	log, err := ParseLog(req.Event.Subscription, req.Event.Log)
@@ -108,11 +115,18 @@ func StarkBankWebhook(c *gin.Context) {
 	if !ok {
 		return
 	}
-	t, err := time.Parse(time.RFC3339, creatdAt)
+	createTime, err := time.Parse(time.RFC3339, creatdAt)
 	if err != nil {
 		global.GVA_LOG.Error("StarkBankWebhook:parseTime",
 			zap.String("time", creatdAt), zap.Error(err))
 		return
+	}
+
+	var updateTime time.Time
+	if deposit.Updated != nil {
+		updateTime = *deposit.Updated
+	} else {
+		updateTime = time.Now()
 	}
 	// 生成订单
 	amount := float64(deposit.Amount)
@@ -122,15 +136,14 @@ func StarkBankWebhook(c *gin.Context) {
 		Name:    deposit.Name,
 		Comment: "",
 		Value:   &amount,
+		Fee:     float64(deposit.Fee),
 		// ValueType: deposit.Amount,
-		Status:     deposit.Type,
+		Status:     deposit.Status,
 		Identifier: uuid,
 		Data:       *(*string)(unsafe.Pointer(&body)),
 	}
-	order.GVA_MODEL = global.GVA_MODEL{
-		CreatedAt: t,
-		UpdatedAt: t,
-	}
+	order.GVA_MODEL.CreatedAt = createTime
+	order.GVA_MODEL.UpdatedAt = updateTime
 
 	service := agentService.PayOrderService{}
 	if err := service.CreatePayOrder(&order); err != nil {

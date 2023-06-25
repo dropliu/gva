@@ -1,7 +1,6 @@
 package global
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -57,7 +56,6 @@ func MustGetGlobalDBByDBName(dbname string) *gorm.DB {
 }
 
 func FindPayment(id string) (config.Payment, bool) {
-	fmt.Println("findPayment", id, &GVA_CONFIG.Payments)
 	for _, item := range GVA_CONFIG.Payments {
 		if item.ID == id {
 			return item, true

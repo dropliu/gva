@@ -21,6 +21,8 @@ func TestPayment(t *testing.T) {
 
 }
 
+// GET http://localhost:8888/payment/brcode?ts=3213&nonce=23121&apiKey=3123
+
 type Payment struct {
 	ID          string `yaml:"id"`
 	Env         string `yaml:"env"`
@@ -106,8 +108,8 @@ func RequestSig(req *http.Request, body, secret []byte) string {
 		// 根据排序组装值
 		for i, key := range keys {
 			var val = queries.Get(key)
-			key = url.QueryEscape(key)
-			val = url.QueryEscape(val)
+			// key = url.QueryEscape(key)
+			// val = url.QueryEscape(val)
 			if i == 0 {
 				b.WriteByte('?')
 			} else {
