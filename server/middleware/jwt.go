@@ -241,8 +241,8 @@ func RequestSig(req *http.Request, secret []byte) (body []byte, err error) {
 		// 根据排序组装值
 		for i, key := range keys {
 			var val = queries.Get(key)
-			key = url.QueryEscape(key)
-			val = url.QueryEscape(val)
+			// key = url.QueryEscape(key)
+			// val = url.QueryEscape(val)
 			if i == 0 {
 				b.WriteByte('?')
 			} else {
